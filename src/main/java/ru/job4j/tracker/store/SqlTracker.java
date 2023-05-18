@@ -9,10 +9,7 @@ import java.util.List;
 import java.util.Properties;
 
 public class SqlTracker implements Store {
-
     private Connection cn;
-
-    Statement statement;
 
     List<Item> itemList;
 
@@ -35,7 +32,6 @@ public class SqlTracker implements Store {
                     config.getProperty("username"),
                     config.getProperty("password")
             );
-            statement = cn.createStatement();
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
@@ -51,7 +47,7 @@ public class SqlTracker implements Store {
     @Override
     public Item add(Item item) {
         try (PreparedStatement statement = cn.prepareStatement("INSERT INTO items(name, created) VALUES (?, ?)",
-                             Statement.RETURN_GENERATED_KEYS)) {
+                Statement.RETURN_GENERATED_KEYS)) {
             statement.setString(1, item.getName());
             statement.setTimestamp(2, item.getCreated());
             statement.execute();
@@ -68,16 +64,11 @@ public class SqlTracker implements Store {
 
     @Override
     public boolean replace(int id, Item item) {
-        try {
-            String sql = String.format(
-                    "SELECT * FROM items WHERE id = " + id + ";"
-            );
-            ResultSet selection = statement.executeQuery(sql);
-            if (selection.next()) {
-                sql = String.format(
-                    "UPDATE items SET name = " + "'" + item.getName() + "'" + " WHERE id= " + id + ";"
-                );
-                statement.execute(sql);
+        try (PreparedStatement statement = cn.prepareStatement("UPDATE items SET name = ? WHERE id= ?")) {
+            statement.setString(1,  item.getName());
+            statement.setInt(2, id);
+            boolean result = statement.executeUpdate() > 0;
+            if (result) {
                 return true;
             }
         } catch (SQLException e) {
@@ -86,18 +77,12 @@ public class SqlTracker implements Store {
         return false;
     }
 
-        @Override
+    @Override
     public boolean delete(int id) {
-        try {
-            String sql = String.format(
-                "SELECT * FROM items WHERE id = " + id + ";"
-            );
-            ResultSet selection = statement.executeQuery(sql);
-            if (selection.next()) {
-                sql = String.format(
-                    "DELETE FROM items WHERE id= " + id + ";"
-                 );
-                statement.execute(sql);
+        try (PreparedStatement statement = cn.prepareStatement("DELETE FROM items WHERE id= ?")) {
+            statement.setInt(1, id);
+            boolean result = statement.executeUpdate() > 0;
+            if (result) {
                 return true;
             }
         } catch (SQLException e) {
@@ -109,15 +94,13 @@ public class SqlTracker implements Store {
     @Override
     public List<Item> findAll() {
         itemList = new ArrayList<>();
-        try {
-            String sql = String.format(
-                    "SELECT * FROM items;"
-            );
-            ResultSet selection = statement.executeQuery(sql);
-            while (selection.next()) {
-                int id = selection.getInt(1);
-                String name = selection.getString(2);
-                itemList.add(new Item(id, name));
+        try (PreparedStatement statement = cn.prepareStatement("SELECT * FROM items;")) {
+            try (ResultSet selection = statement.executeQuery()) {
+                while (selection.next()) {
+                    int id = selection.getInt(1);
+                    String name = selection.getString(2);
+                    itemList.add(new Item(id, name));
+                }
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -128,15 +111,13 @@ public class SqlTracker implements Store {
     @Override
     public List<Item> findByName(String key) {
         itemList = new ArrayList<>();
-        try {
-            String sql = String.format(
-                    "SELECT * FROM items WHERE name= " + "'" + key + "'" + ";"
-            );
-            ResultSet selection = statement.executeQuery(sql);
-            while (selection.next()) {
-                int id = selection.getInt(1);
-                String name = selection.getString(2);
-                itemList.add(new Item(id, name));
+        try (PreparedStatement statement = cn.prepareStatement("SELECT * FROM items WHERE name= " + "'" + key + "'" + ";")) {
+            try (ResultSet selection = statement.executeQuery()) {
+                while (selection.next()) {
+                    int id = selection.getInt(1);
+                    String name = selection.getString(2);
+                    itemList.add(new Item(id, name));
+                }
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -147,20 +128,16 @@ public class SqlTracker implements Store {
     @Override
     public Item findById(int id) {
         Item item = null;
-        try {
-            String sql = String.format(
-                    "SELECT * FROM items WHERE id = " + id + ";"
-            );
-            ResultSet selection = statement.executeQuery(sql);
-            if (selection.next()) {
-                String name = selection.getString(2);
-                item = new Item(id, name);
+        try (PreparedStatement statement = cn.prepareStatement("SELECT * FROM items WHERE id = " + id + ";")) {
+            try (ResultSet selection = statement.executeQuery()) {
+                if (selection.next()) {
+                    String name = selection.getString(2);
+                    item = new Item(id, name);
+                }
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
         return item;
     }
-
-
 }
