@@ -14,7 +14,6 @@ public class Item {
 
     private String name;
 
-
     private LocalDateTime created = LocalDateTime.now();
 
     public Item(String name) {
@@ -45,6 +44,12 @@ public class Item {
     public Timestamp getCreated() {
         return Timestamp.valueOf(created);
     }
+
+    public void setCreated(Timestamp timestamp) {
+        this.created = timestamp.toLocalDateTime();
+    }
+
+
 
 
     @Override
