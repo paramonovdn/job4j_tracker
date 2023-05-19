@@ -2,16 +2,18 @@ package ru.job4j.tracker.store;
 
 import ru.job4j.tracker.model.Item;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 
 public class SqlTracker implements Store {
     private Connection cn;
 
     List<Item> itemList;
+    private final Map<String, String> properties = new HashMap<String, String>();
 
     public SqlTracker() {
         init();
@@ -22,19 +24,40 @@ public class SqlTracker implements Store {
     }
 
     private void init() {
-        try (InputStream in = SqlTracker.class.getClassLoader()
-                .getResourceAsStream("app.properties")) {
-            Properties config = new Properties();
-            config.load(in);
-            Class.forName(config.getProperty("driver-class-name"));
+        StringBuilder text = null;
+        try (InputStream in = new FileInputStream("db/liquibase.properties")) {
+            text = new StringBuilder();
+            int read;
+            while ((read = in.read()) != -1) {
+                text.append((char) read);
+            }
+            String[] lines = text.toString().split(System.lineSeparator());
+            for (String line : lines) {
+                int simbolPosition = line.indexOf("=");
+                String key = line.substring(0, simbolPosition);
+                String value = line.substring(simbolPosition + 1, line.length());
+                if (key.isEmpty() || value.isEmpty()) {
+                    throw new IllegalArgumentException();
+                } else {
+                    properties.put(key, value);
+                }
+            }
+            Class.forName(properties.get("driver-class-name"));
             cn = DriverManager.getConnection(
-                    config.getProperty("url"),
-                    config.getProperty("username"),
-                    config.getProperty("password")
+                    properties.get("url"),
+                    properties.get("username"),
+                    properties.get("password")
             );
-        } catch (Exception e) {
-            throw new IllegalStateException(e);
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
         }
+
     }
 
     @Override
