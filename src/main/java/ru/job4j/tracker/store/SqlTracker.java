@@ -13,7 +13,7 @@ public class SqlTracker implements Store {
     private Connection cn;
 
     List<Item> itemList;
-    private final Map<String, String> properties = new HashMap<String, String>();
+    private final Map<String, String> propertiesMap = new HashMap<String, String>();
 
     public SqlTracker() {
         init();
@@ -39,14 +39,14 @@ public class SqlTracker implements Store {
                 if (key.isEmpty() || value.isEmpty()) {
                     throw new IllegalArgumentException();
                 } else {
-                    properties.put(key, value);
+                    propertiesMap.put(key, value);
                 }
             }
-            Class.forName(properties.get("driver-class-name"));
+            Class.forName(propertiesMap.get("driver-class-name"));
             cn = DriverManager.getConnection(
-                    properties.get("url"),
-                    properties.get("username"),
-                    properties.get("password")
+                    propertiesMap.get("url"),
+                    propertiesMap.get("username"),
+                    propertiesMap.get("password")
             );
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
