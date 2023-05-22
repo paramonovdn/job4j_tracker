@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import ru.job4j.tracker.model.Item;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
@@ -21,11 +20,11 @@ import static org.assertj.core.api.Assertions.*;
 public class SqlTrackerTest {
 
     private static Connection connection;
-    private static Map<String, String> properties = new HashMap<String, String>();
+    private static final Map<String, String> PROPERTIES = new HashMap<>();
 
     @BeforeAll
     public static void initConnection() {
-        StringBuilder text = null;
+        StringBuilder text;
         try (InputStream in = new FileInputStream("db/liquibase_test.properties")) {
             text = new StringBuilder();
             int read;
@@ -36,22 +35,16 @@ public class SqlTrackerTest {
             for (String line : lines) {
                 int simbolPosition = line.indexOf("=");
                 String key = line.substring(0, simbolPosition);
-                String value = line.substring(simbolPosition + 1, line.length());
-                properties.put(key, value);
+                String value = line.substring(simbolPosition + 1);
+                PROPERTIES.put(key, value);
             }
-            Class.forName(properties.get("driver-class-name"));
+            Class.forName(PROPERTIES.get("driver-class-name"));
             connection = DriverManager.getConnection(
-                    properties.get("url"),
-                    properties.get("username"),
-                    properties.get("password")
+                    PROPERTIES.get("url"),
+                    PROPERTIES.get("username"),
+                    PROPERTIES.get("password")
             );
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } catch (ClassNotFoundException e) {
+        } catch (IOException | SQLException | ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
     }
