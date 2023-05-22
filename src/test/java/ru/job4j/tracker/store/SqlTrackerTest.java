@@ -21,7 +21,7 @@ import static org.assertj.core.api.Assertions.*;
 public class SqlTrackerTest {
 
     private static Connection connection;
-    private static final Map<String, String> properties = new HashMap<String, String>();
+    private static Map<String, String> properties = new HashMap<String, String>();
 
     @BeforeAll
     public static void initConnection() {
