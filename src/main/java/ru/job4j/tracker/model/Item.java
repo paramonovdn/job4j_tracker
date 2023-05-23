@@ -44,9 +44,6 @@ public class Item {
     public Timestamp getCreated() {
         return Timestamp.valueOf(created);
     }
-    public String getCreated2() {
-        return FORMATTER.format(created);
-    }
 
     public void setCreated(Timestamp timestamp) {
         this.created = timestamp.toLocalDateTime();
@@ -73,6 +70,6 @@ public class Item {
 
     @Override
     public String toString() {
-        return String.format("id: %s, name: %s, created: %s", id, name, FORMATTER.format(created));
+        return String.format("id: %s, name: %s", id, name);
     }
 }

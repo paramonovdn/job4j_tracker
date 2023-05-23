@@ -22,28 +22,18 @@ public class SqlTrackerTest {
     private static final Map<String, String> PROPERTIES = new HashMap<>();
     @BeforeAll
     public static void initConnection() {
-        StringBuilder text;
         try (InputStream in = new FileInputStream("db/liquibase_test.properties")) {
-            text = new StringBuilder();
-            int read;
-            while ((read = in.read()) != -1) {
-                text.append((char) read);
-            }
-            String[] lines = text.toString().split(System.lineSeparator());
-            for (String line : lines) {
-                int simbolPosition = line.indexOf("=");
-                String key = line.substring(0, simbolPosition);
-                String value = line.substring(simbolPosition + 1);
-                PROPERTIES.put(key, value);
-            }
-            Class.forName(PROPERTIES.get("driver-class-name"));
+            Properties config = new Properties();
+            config.load(in);
+            Class.forName(config.getProperty("driver-class-name"));
             connection = DriverManager.getConnection(
-                    PROPERTIES.get("url"),
-                    PROPERTIES.get("username"),
-                    PROPERTIES.get("password")
+                    config.getProperty("url"),
+                    config.getProperty("username"),
+                    config.getProperty("password")
+
             );
-        } catch (IOException | SQLException | ClassNotFoundException e) {
-            throw new RuntimeException(e);
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
         }
     }
     @AfterAll
