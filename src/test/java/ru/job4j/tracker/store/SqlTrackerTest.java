@@ -18,10 +18,8 @@ import java.util.*;
 import static org.assertj.core.api.Assertions.*;
 
 public class SqlTrackerTest {
-
     private static Connection connection;
     private static final Map<String, String> PROPERTIES = new HashMap<>();
-
     @BeforeAll
     public static void initConnection() {
         StringBuilder text;
@@ -48,7 +46,6 @@ public class SqlTrackerTest {
             throw new RuntimeException(e);
         }
     }
-
     @AfterAll
     public static void closeConnection() throws SQLException {
         connection.close();
@@ -60,7 +57,6 @@ public class SqlTrackerTest {
             statement.execute();
         }
     }
-
     @Test
     public void whenSaveItemAndFindByGeneratedIdThenMustBeTheSame() {
         SqlTracker tracker = new SqlTracker(connection);
@@ -68,7 +64,6 @@ public class SqlTrackerTest {
         tracker.add(item);
         assertThat(tracker.findById(item.getId())).isEqualTo(item);
     }
-
     @Test
     public void whenAddSeveralItem() {
         SqlTracker tracker = new SqlTracker(connection);
@@ -79,7 +74,6 @@ public class SqlTrackerTest {
         assertThat(tracker.add(item1)).isEqualTo(item1);
         assertThat(tracker.add(item2)).isEqualTo(item2);
     }
-
     @Test
     public void whenReplaceItem() {
         SqlTracker tracker = new SqlTracker(connection);
@@ -89,7 +83,6 @@ public class SqlTrackerTest {
         assertThat(tracker.replace(item.getId(), anotherItem)).isEqualTo(true);
         assertThat(tracker.findById(item.getId())).isEqualTo(anotherItem);
     }
-
     @Test
     public void whenDeleteItem() {
         SqlTracker tracker = new SqlTracker(connection);
@@ -102,7 +95,6 @@ public class SqlTrackerTest {
         assertThat(tracker.delete(item2.getId())).isEqualTo(true);
         assertThat(tracker.findById(item2.getId())).isEqualTo(null);
     }
-
     @Test
     public void whenFindAllItems() {
         SqlTracker tracker = new SqlTracker(connection);
@@ -114,7 +106,6 @@ public class SqlTrackerTest {
         tracker.add(item2);
         assertThat(tracker.findAll()).isEqualTo(Arrays.asList(item0, item1, item2));
     }
-
     @Test
     public void whenFindByName() {
         SqlTracker tracker = new SqlTracker(connection);
@@ -126,7 +117,6 @@ public class SqlTrackerTest {
         tracker.add(item2);
         assertThat(tracker.findByName("item2")).isEqualTo(Arrays.asList(item0, item1, item2));
     }
-
     @Test
     public void whenFindById() {
         SqlTracker tracker = new SqlTracker(connection);
@@ -138,7 +128,5 @@ public class SqlTrackerTest {
         tracker.add(item2);
         assertThat(tracker.findById(item2.getId())).isEqualTo(item2);
     }
-
-
 
 }

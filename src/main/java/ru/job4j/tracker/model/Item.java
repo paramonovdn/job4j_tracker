@@ -44,6 +44,9 @@ public class Item {
     public Timestamp getCreated() {
         return Timestamp.valueOf(created);
     }
+    public String getCreated2() {
+        return FORMATTER.format(created);
+    }
 
     public void setCreated(Timestamp timestamp) {
         this.created = timestamp.toLocalDateTime();
