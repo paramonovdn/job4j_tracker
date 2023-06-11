@@ -4,6 +4,8 @@ import ru.job4j.tracker.action.*;
 import ru.job4j.tracker.input.ConsoleInput;
 import ru.job4j.tracker.input.Input;
 import ru.job4j.tracker.input.ValidateInput;
+import ru.job4j.tracker.output.ConsoleOutput;
+import ru.job4j.tracker.output.Output;
 import ru.job4j.tracker.store.MemTracker;
 import ru.job4j.tracker.store.SqlTracker;
 import ru.job4j.tracker.store.Store;
@@ -32,16 +34,12 @@ public class StartUI {
         Input validate = new ValidateInput(
                 new ConsoleInput()
         );
-        Store tracker = new SqlTracker();
-        UserAction[] actions = {
-                new CreateAction(),
-                new ReplaceAction(),
-                new DeleteAction(),
-                new FindAllAction(),
-                new FindByIdAction(),
-                new FindByNameAction(),
-                new ExitAction()
-        };
-        new StartUI().init(validate, tracker, actions);
+        Store tracker = new MemTracker();
+        Output output = new ConsoleOutput();
+        CreateManyItems createManyItems = new CreateManyItems(output);
+        createManyItems.execute(validate, tracker);
+        DeleteAllItems deleteAllItems = new DeleteAllItems(output);
+        deleteAllItems.execute(validate, tracker);
+
     }
 }
