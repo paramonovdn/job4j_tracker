@@ -27,14 +27,13 @@ public class HbmTracker implements Store, AutoCloseable {
         try {
             session.beginTransaction();
             session.save(item);
-            session.getTransaction().commit();
-            var newId = session.createQuery("from Items as item where item.name = :itemName, item.created = :itemCreated",
+            var newId = session.createQuery("FROM Item AS item WHERE item.name = :itemName AND item.created = :itemCreated",
                             Item.class)
                     .setParameter("itemName", item.getName())
                     .setParameter("itemCreated", item.getCreated())
                     .uniqueResult().getId();
-            session.getTransaction().commit();
             item.setId(newId);
+            session.getTransaction().commit();
         } catch (Exception e) {
             session.getTransaction().rollback();
             LOG.error(e.getMessage(), e);
@@ -51,10 +50,10 @@ public class HbmTracker implements Store, AutoCloseable {
         try {
             session.beginTransaction();
             var query = session.createQuery(
-                            "UPDATE Items SET name = :iName, created = :iCreated WHERE id = :iId")
+                            "UPDATE Item SET name = :iName, created = :iCreated WHERE id = :iId")
                     .setParameter("iName", item.getName())
                     .setParameter("iCreated", item.getCreated())
-                    .setParameter("iId", item.getId());
+                    .setParameter("iId", id);
             result = query.executeUpdate() > 0;
             session.getTransaction().commit();
         } catch (Exception e) {
@@ -73,7 +72,7 @@ public class HbmTracker implements Store, AutoCloseable {
         try {
             session.beginTransaction();
             var query = session.createQuery(
-                            "DELETE Items WHERE id = :iId")
+                            "DELETE Item WHERE id = :iId")
                     .setParameter("iId", id);
             result = query.executeUpdate() > 0;
             session.getTransaction().commit();
@@ -92,7 +91,7 @@ public class HbmTracker implements Store, AutoCloseable {
         List<Item> result = new ArrayList<>();
         try {
             session.beginTransaction();
-            result = session.createQuery("from Items", Item.class).list();
+            result = session.createQuery("FROM Item", Item.class).list();
             session.getTransaction().commit();
         } catch (Exception e) {
             session.getTransaction().rollback();
@@ -109,7 +108,7 @@ public class HbmTracker implements Store, AutoCloseable {
         List<Item> result = new ArrayList<>();
         try {
             session.beginTransaction();
-            result = session.createQuery("from Items WHERE name LIKE :searchKey", Item.class)
+            result = session.createQuery("FROM Item WHERE name LIKE :searchKey", Item.class)
                     .setParameter("searchKey", "%" + key + "%")
                     .list();
             session.getTransaction().commit();
@@ -129,7 +128,7 @@ public class HbmTracker implements Store, AutoCloseable {
         try {
             session.beginTransaction();
             Query<Item> query = session.createQuery(
-                    "from Items as user where item.id = :itemId", Item.class);
+                    "FROM Item AS item WHERE item.id = :itemId", Item.class);
             query.setParameter("itemId", id);
             result = query.uniqueResult();
             session.getTransaction().commit();

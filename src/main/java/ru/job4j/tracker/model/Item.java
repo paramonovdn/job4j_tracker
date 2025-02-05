@@ -1,43 +1,60 @@
 package ru.job4j.tracker.model;
 
-
-
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 
-import java.sql.Timestamp;
+import ru.job4j.toone.User;
+
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Objects;
 
 @Entity
 @Table(name = "items")
-@Data
+@AllArgsConstructor
 @NoArgsConstructor
+@EqualsAndHashCode(of = "id")
 public class Item {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    @Getter
+    @Setter
+    private Integer id;
+    @Getter
+    @Setter
     private String name;
-    private LocalDateTime created = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
+    @Getter
+    @Setter
+    private LocalDateTime created = LocalDateTime.now();
 
     public Item(String name) {
         this.name = name;
     }
 
-    public Item(int id, String name) {
+    public Item(Integer id, String name) {
         this.id = id;
         this.name = name;
     }
 
-    public Timestamp getCreated() {
-        return Timestamp.valueOf(created);
-    }
+    @Getter
+    @Setter
+    @ManyToMany
+    @JoinTable(
+            name = "participates",
+            joinColumns = { @JoinColumn(name = "item_id") },
+            inverseJoinColumns = { @JoinColumn(name = "user_id") }
+    )
+    private List<User> participates = new ArrayList<>();
 
-    public void setCreated(Timestamp timestamp) {
-        this.created = timestamp.toLocalDateTime();
+    @Override
+    public String toString() {
+        return "Item("
+                + "id=" + id
+                + ", name=" + name
+                + ", created=" + created
+                + ')';
     }
-
 }

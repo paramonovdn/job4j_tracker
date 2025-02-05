@@ -51,7 +51,7 @@ public class SqlTracker implements Store {
         try (PreparedStatement statement = cn.prepareStatement("INSERT INTO items(name, created) VALUES (?, ?)",
                 Statement.RETURN_GENERATED_KEYS)) {
             statement.setString(1, item.getName());
-            statement.setTimestamp(2, item.getCreated());
+            statement.setTimestamp(2, Timestamp.valueOf(item.getCreated()));
             statement.execute();
             try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
@@ -68,7 +68,7 @@ public class SqlTracker implements Store {
     public boolean replace(int id, Item item) {
         try (PreparedStatement statement = cn.prepareStatement("UPDATE items SET name = ?, created = ? WHERE id= ?")) {
             statement.setString(1,  item.getName());
-            statement.setTimestamp(2, item.getCreated());
+            statement.setTimestamp(2, Timestamp.valueOf(item.getCreated()));
             statement.setInt(3, id);
             boolean result = statement.executeUpdate() > 0;
             if (result) {
@@ -104,7 +104,7 @@ public class SqlTracker implements Store {
                     String name = selection.getString(2);
                     Timestamp timeStamp = selection.getTimestamp(3);
                     Item item = new Item(id, name);
-                    item.setCreated(timeStamp);
+                    item.setCreated(timeStamp.toLocalDateTime());
                     itemList.add(item);
                 }
             }
@@ -125,7 +125,7 @@ public class SqlTracker implements Store {
                     String name = selection.getString(2);
                     Timestamp timeStamp = selection.getTimestamp(3);
                     Item item = new Item(id, name);
-                    item.setCreated(timeStamp);
+                    item.setCreated(timeStamp.toLocalDateTime());
                     itemList.add(item);
                 }
             }
@@ -145,7 +145,7 @@ public class SqlTracker implements Store {
                     String name = selection.getString(2);
                     Timestamp timeStamp = selection.getTimestamp(3);
                     item = new Item(id, name);
-                    item.setCreated(timeStamp);
+                    item.setCreated(timeStamp.toLocalDateTime());
                 }
             }
         } catch (SQLException e) {
